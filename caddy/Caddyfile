@@ -1,5 +1,6 @@
 {
 	order php_server before file_server
+	local_certs
 }
 
 import sites/*
