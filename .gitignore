@@ -4,8 +4,8 @@
 .vscode/
 .idea/
 
-# Caddy run-time state
-caddy/caddy_data/
+caddy/sites/*
+!caddy/sites/localhost
 
 # WordPress uploads and caches
 www/wp-content/uploads/
@@ -15,8 +15,7 @@ www/wp-content/debug.log
 www/wp-content/backups-db/
 
 # Generated WordPress config (entrypoint will recreate it if missing)
-www/localhost/*
-wp-config.php
+www/*
 
 # WP-CLI artifacts
 wp-cli.*

@@ -1,5 +1,5 @@
 {
-# Global options
+	order php_server before file_server
 }
 
 import sites/*
