@@ -28,27 +28,30 @@ Export any overrides in your shell or define them in a `.env` file before invoki
 
 ## Key directories
 
-- `[www/](www/)` ← WordPress root (core files, themes, plugins, media, etc.). Treat it as your working tree when customizing PHP, JS, or theme files.
-- `[data/](data/)` ← Persistent storage for Caddy (locks, certificates) and MariaDB data directories mounted into the container. Do not delete it if you want to keep your site data.
-- `[config/](config/)` ← Additional configuration fragments consumed by FrankenPHP/Caddy.
-- `[caddy/Caddyfile](caddy/Caddyfile)` and `[caddy/Caddyfile.d](caddy/Caddyfile.d)` ← Caddy configuration served inside the container; edit these to change TLS, redirects, or HTTP/3 settings and reload the container.
-- `[scripts/entrypoint.sh](scripts/entrypoint.sh)` ← Boot script invoked by the container. It downloads WordPress, bootstraps `wp-config.php`, waits for MariaDB, and installs Query Monitor by default.
+- `[www/](www/)` ← Host-mounted web root. The container installs WordPress into `www/localhost/`.
+- `[www/localhost/](www/localhost/)` ← WordPress site root (core files, themes, plugins, media, etc.). Treat this as your working tree when customizing themes/plugins.
+- `[caddy/Caddyfile](caddy/Caddyfile)` ← Global Caddy config; it imports all site definitions from `caddy/sites/*`.
+- `[caddy/sites/](caddy/sites/)` ← Per-site Caddy configs (this repo ships `caddy/sites/localhost`).
+- `[scripts/entrypoint.sh](scripts/entrypoint.sh)` ← Container boot script. It downloads WordPress (if missing), bootstraps `wp-config.php`, waits for MariaDB, installs WordPress, and activates Query Monitor.
+
+Persistent storage is handled via named Compose volumes (`caddy_data`, `caddy_config`, `mariadb_data`, `mariadb_config`), not repo folders.
 
 ## Helpers & maintenance
 
-- Run `docker compose exec php wp <command>` to operate WP-CLI; e.g., `docker compose exec php wp plugin list`.
-- The container ships with `mariadb-client`, so you can execute `docker compose exec php mysql -h mariadb -u wpuser -pwppass wordpress` if you prefer native SQL.
+- Run WP-CLI via `docker compose exec php wp --path=/app/www/localhost <command>`; e.g., `docker compose exec php wp --path=/app/www/localhost plugin list`.
+- The container ships with `mariadb-client`, so you can execute `docker compose exec php mysql -h mariadb -u wpuser -p"wppass" wordpress` if you prefer native SQL.
 - PHP extensions are added via `install-php-extensions` inside [Dockerfile](Dockerfile); edit that file if you need additional PHP modules.
 - To rebuild the image after changing PHP extensions or other build-time files, run `docker compose build php`.
 
 ## Development tips
 
-- Keep `www/wp-content/uploads` and other user-generated assets outside version control by committing only themes/plugins you edit.
-- Back up `data/` before wiping containers so MariaDB credentials and TLS state survive.
+- Keep `www/localhost/wp-content/uploads` and other user-generated assets outside version control by committing only themes/plugins you edit.
+- Back up your named volumes before wiping containers if you want MariaDB data and Caddy TLS state to survive.
 - The `php` service binds ports `80`, `443` (and `443/udp` for HTTP/3); change them in [compose.yml](compose.yml) when they conflict with other services.
 
 ## Troubleshooting
 
 - `docker compose logs php` shows both WordPress bootstrap progress and Caddy logs.
 - If WordPress reports "Error establishing a database connection", make sure MariaDB is healthy (`docker compose ps` and `docker compose logs mariadb`).
-- To force a fresh WordPress install, remove `www/wp-config.php` and restart the stack; the entrypoint script will recreate the config and run `wp core install` again.
+- To force a fresh WordPress config bootstrap, remove `www/localhost/wp-config.php` and restart the stack; the entrypoint script will recreate the config.
+- To wipe everything (including the database), use `docker compose down -v` to remove containers and named volumes.
