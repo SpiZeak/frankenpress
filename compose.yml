@@ -1,0 +1,47 @@
+services:
+  php:
+    build: .
+    container_name: php
+    restart: unless-stopped
+    ports:
+      - "80:80" # HTTP
+      - "443:443" # HTTPS
+      - "443:443/udp" # HTTP/3
+    volumes:
+      - ./www:/app/www
+      - caddy_data:/data
+      - caddy_config:/config
+      - ./caddy/Caddyfile:/etc/frankenphp/Caddyfile
+      - ./caddy/sites:/etc/frankenphp/sites
+      # - ./php/php.ini:/usr/local/etc/php/php.ini
+      # - ./php/conf.d:/usr/local/etc/php/conf.d
+    environment:
+      WP_DB_HOST: mariadb
+      WP_DB_NAME: wordpress
+      WP_DB_USER: wpuser
+      WP_DB_PASSWORD: wppass
+    depends_on:
+      - mariadb
+
+    # comment the following line in production, it allows to have nice human-readable logs in dev
+    tty: true
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wpuser
+      MYSQL_PASSWORD: wppass
+    volumes:
+      - mariadb_data:/var/lib/mysql
+      - mariadb_config:/etc/mysql/conf.d
+    ports:
+      - "3306:3306"
+volumes:
+  caddy_data:
+  caddy_config:
+  mariadb_data:
+  mariadb_config:

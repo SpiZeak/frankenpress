@@ -1,0 +1,6 @@
+localhost {
+	encode zstd br gzip
+	root * /app/www/localhost
+	php_server
+	file_server
+}
