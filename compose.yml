@@ -41,8 +41,19 @@ services:
       - mariadb_config:/etc/mysql/conf.d
     ports:
       - "3306:3306"
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: unless-stopped
+    expose:
+      - "6379"
+    volumes:
+      - redis_data:/data
+
 volumes:
   caddy_data:
   caddy_config:
   mariadb_data:
   mariadb_config:
+  redis_data:

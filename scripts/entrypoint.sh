@@ -21,6 +21,7 @@ SITE_TITLE="${WP_SITE_TITLE:-WordPress}"
 ADMIN_USER="${WP_ADMIN_USER:-admin}"
 ADMIN_PASSWORD="${WP_ADMIN_PASSWORD:-admin}"
 ADMIN_EMAIL="${WP_ADMIN_EMAIL:-admin@example.com}"
+ENABLE_QUERY_MONITOR="${WP_ENABLE_QUERY_MONITOR:-0}"
 
 if [ ! -f "$WORDPRESS_PATH/wp-load.php" ]; then
   echo "WordPress core not found; downloading..."
@@ -67,11 +68,13 @@ if wp_cli db check --path="$WORDPRESS_PATH" >/dev/null 2>&1; then
     echo "WordPress is already installed."
   fi
 
-  # Install and activate Query Monitor plugin
-  if ! wp_cli plugin is-installed query-monitor --path="$WORDPRESS_PATH" >/dev/null 2>&1; then
-    wp_cli plugin install query-monitor --activate --path="$WORDPRESS_PATH"
-  else
-    wp_cli plugin activate query-monitor --path="$WORDPRESS_PATH" >/dev/null 2>&1 || true
+  # Install Query Monitor only when explicitly enabled.
+  if [ "$ENABLE_QUERY_MONITOR" = "1" ]; then
+    if ! wp_cli plugin is-installed query-monitor --path="$WORDPRESS_PATH" >/dev/null 2>&1; then
+      wp_cli plugin install query-monitor --activate --path="$WORDPRESS_PATH"
+    else
+      wp_cli plugin activate query-monitor --path="$WORDPRESS_PATH" >/dev/null 2>&1 || true
+    fi
   fi
 fi
 
