@@ -7,6 +7,8 @@
 caddy/sites/*
 !caddy/sites/localhost
 
+mariadb/files/*
+
 # WordPress uploads and caches
 www/wp-content/uploads/
 www/wp-content/upgrade/
