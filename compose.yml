@@ -17,9 +17,9 @@ services:
       # - ./php/conf.d:/usr/local/etc/php/conf.d
     environment:
       WP_DB_HOST: mariadb
-      WP_DB_NAME: wordpress
-      WP_DB_USER: wpuser
-      WP_DB_PASSWORD: wppass
+      WP_DB_NAME: database
+      WP_DB_USER: root
+      WP_DB_PASSWORD: root
     depends_on:
       - mariadb
 
@@ -32,9 +32,9 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: root
-      MYSQL_DATABASE: wordpress
-      MYSQL_USER: wpuser
-      MYSQL_PASSWORD: wppass
+      MYSQL_DATABASE: database
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
     volumes:
       - mariadb_data:/var/lib/mysql
       - mariadb_config:/etc/mysql/conf.d
